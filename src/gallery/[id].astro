@@ -1,0 +1,50 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/footer.astro";
+import SVGCard from "../components/SVGCard.astro";
+import pb from "../utils/pb";
+import { Collections, type SvgRecord } from "../utils/pocketbase-types";
+
+
+const locale = ((Astro.locals as any)?.lang ?? 'en') as 'en' | 'fr';
+
+// 🧠 Récupération de toutes les entrées SVG dans PocketBase
+const svgs: SvgRecord[] = await pb.collection(Collections.Svg).getFullList({
+  sort: "-created",
+});
+---
+
+<Layout>
+  <!-- 🌐 En-tête du site -->
+  <Header />
+
+  <main class="min-h-screen w-full flex flex-col items-center justify-start bg-base-200 px-6 py-12">
+    <!-- 🏷️ Titre -->
+    <h1 class="text-4xl font-jockey text-[#30475E] mb-10 text-center">
+      Historique
+    </h1>
+
+    <!-- 🧱 Grille de cartes SVG -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full max-w-6xl">
+      {
+        svgs.length > 0 ? (
+          svgs.map((svg) => (
+            <SVGCard
+              id={svg.id}
+              name={svg.name}
+              svg={svg.code_svg}
+            />
+          ))
+        ) : (
+          <p class="text-center text-lg text-base-content/60 col-span-full">
+            {ui[locale].gallery.noHistory}
+          </p>
+        )
+      }
+    </div>
+  </main>
+
+  <!-- 🦶 Pied de page -->
+  <Footer />
+</Layout>

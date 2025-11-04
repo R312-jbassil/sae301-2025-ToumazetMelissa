@@ -1,0 +1,29 @@
+---
+const { id, name, svg } = Astro.props;
+---
+
+<div class="card bg-base-100 shadow-xl border border-base-300 rounded-lg overflow-hidden aspect-square flex flex-col justify-between">
+  <div class="flex flex-col justify-between items-center gap-4 p-6 flex-grow">
+    <div
+      class="w-full h-[200px] flex justify-center items-center border border-dashed border-primary rounded-md overflow-hidden"
+      set:html={svg}
+    ></div>
+    <h2 class="text-lg font-semibold text-center">{name}</h2>
+  </div>
+
+  <!-- Zone des boutons en bas à gauche -->
+  <div class="flex flex-col items-start gap-2 p-4">
+    <button
+      class="font-jockey text-white px-6 py-2 rounded-2xl"
+      style="background-color: #F05454;"
+    >
+      Commander
+    </button>
+    <button
+      class="font-jockey text-white px-6 py-2 rounded-2xl"
+      style="background-color: #30475E;"
+    >
+      Modifié
+    </button>
+  </div>
+</div>
