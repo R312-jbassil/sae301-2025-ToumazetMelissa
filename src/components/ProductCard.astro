@@ -2,7 +2,7 @@
 const { image, title, price, link } = Astro.props;
 ---
 
-<a href={link} class="block mx-4">
+<a href={link} class="block mx-[100px]">
   <div class="overflow-hidden rounded-xl transition-transform hover:scale-105 duration-300">
     <img src={image} alt={title} class="w-full aspect-square object-cover rounded-xl shadow-md" />
   </div>

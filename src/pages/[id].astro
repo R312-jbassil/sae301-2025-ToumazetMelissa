@@ -1,0 +1,211 @@
+---
+import Layout from "../layouts/Layout.astro";
+import pb from "../utils/pb";
+
+const id = Astro.params.id;
+// Use the actual collection name string to avoid relying on generated types
+const svg = await pb.collection('Svgs').getOne(id);
+---
+
+<Layout>
+  <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6 font-jockey text-[#30475E] mx-[100px]">
+    
+    <!-- 🕶️ Encadré principal -->
+    <div class="w-full max-w-6xl rounded-2xl bg-gradient-to-r from-[#F05454] to-[#30475E] p-[2px] mb-10">
+      <div class="bg-white rounded-2xl p-8 shadow-lg">
+        <h1 class="text-3xl font-bold text-center mb-6">Générateur de lunettes</h1>
+
+        <!-- SVG + Chat -->
+        <div class="flex flex-col md:flex-row gap-6">
+          
+          <!-- 🖼️ SVG Aperçu -->
+          <div class="flex-1 flex flex-col items-center justify-center bg-gray-100 rounded-xl border border-gray-200 p-4 shadow-inner">
+              <div id="svg-output" class="w-full h-[400px] flex items-center justify-center rounded-xl border-2 border-dashed border-[#30475E] bg-gradient-to-br from-[#F0545440] to-[#30475E20]">
+              {svg?.code_svg && <div set:html={svg.code_svg} />}
+            </div>
+          </div>
+
+          <!-- 💬 Historique Chat -->
+          <div id="chat-history" class="flex flex-col gap-4 flex-1 p-4 rounded-xl bg-gray-50 border border-gray-200 overflow-y-auto shadow-inner">
+            {
+              Array.isArray(svg?.chat_history) && svg.chat_history.length > 0 ? (
+                svg.chat_history.map((msg: { role: string; content: string }) => (
+                  <div class={`chat ${msg.role === "user" ? "chat-start" : "chat-end"}`}>
+                    <div class={`chat-bubble ${msg.role === "user" ? "bg-[#F05454] text-white" : "bg-[#30475E] text-white"}`}>
+                      <pre>{msg.content}</pre>
+                    </div>
+                    <div class="chat-footer opacity-60 text-xs mt-1">{msg.role}</div>
+                  </div>
+                ))
+              ) : (
+                <p class="text-center text-base text-gray-500">Aucun historique</p>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✍️ Encadré prompt utilisateur -->
+    <div class="w-full max-w-3xl rounded-2xl bg-gradient-to-r from-[#F05454] to-[#30475E] p-[2px] mb-8">
+      <div class="bg-white rounded-2xl p-6 shadow-lg">
+        <h2 class="text-2xl font-bold text-center mb-4">Écrivez ce que vous voulez</h2>
+        <form id="input-prompt-form" class="flex gap-4" method="POST" autocomplete="off">
+          <input
+            type="hidden"
+            name="history"
+            value={JSON.stringify(svg?.chat_history || [])}
+          />
+          <input type="hidden" name="id" value={svg?.id} />
+          <input
+            id="prompt-input"
+            name="editPrompt"
+            type="text"
+            placeholder="Décrivez le SVG que vous voulez générer..."
+            class="input input-bordered w-full border-[#30475E] focus:ring-[#F05454]"
+          />
+          <button class="btn bg-[#F05454] text-white hover:bg-[#e04646]" type="submit">
+            Générer
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 🔘 Boutons personnalisés -->
+    <div class="flex gap-6 mb-16">
+      <button id="download-svg-btn" class="btn bg-[#30475E] text-white hover:bg-[#26384a] px-6 py-3 rounded-xl shadow-md">
+        Télécharger le SVG
+      </button>
+    </div>
+  </div>
+
+  <!-- ✅ Script -->
+  <script>
+    //@ts-nocheck
+    const form = document.getElementById("input-prompt-form");
+    const svgPreview = document.getElementById("svg-output");
+    const chatHistory = document.getElementById("chat-history");
+
+    async function generateSVG(prompt) {
+      const selectedModel = "meta-llama/Llama-3.1-8B-Instruct:novita";
+      try {
+        const response = await fetch("/api/generateSVG", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: [prompt], model: selectedModel }),
+        });
+
+        if (!response.ok) {
+          console.error("Erreur HTTP:", response.status);
+          return "Erreur lors de la génération du SVG.";
+        }
+
+        const data = await response.json();
+        return data.svg || "Erreur : Aucune réponse SVG reçue.";
+      } catch (error) {
+        console.error("Erreur JS:", error);
+        return "Erreur lors de la génération du SVG.";
+      }
+    }
+
+    async function update(updatedData) {
+      const response = await fetch("/api/updateSVG", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData),
+      });
+      return response;
+    }
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const userPrompt = formData.get("editPrompt")?.trim();
+      const rawHistory = formData.get("history");
+      const id = formData.get("id");
+
+      if (!userPrompt) return;
+
+      let history = [];
+      try {
+        history = rawHistory ? JSON.parse(rawHistory) : [];
+      } catch {
+        console.warn("Historique mal formé :", rawHistory);
+      }
+
+      const prompt = { role: "user", content: userPrompt };
+      history.push(prompt);
+
+      document.getElementById("prompt-input").value = "";
+
+      chatHistory.innerHTML += `
+        <div class="chat chat-start">
+          <div class="chat-bubble bg-[#F05454] text-white">
+            <pre>${prompt.content}</pre>
+          </div>
+          <div class="chat-footer opacity-60 text-xs mt-1">user</div>
+        </div>
+      `;
+
+      svgPreview.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
+
+      const aiResponse = await generateSVG(prompt);
+      history.push({ role: "assistant", content: aiResponse });
+
+      const svgMatch = aiResponse.content.match(/<svg[\s\S]*?<\/svg>/i);
+      const svgCode = svgMatch ? svgMatch[0] : "";
+
+      svgPreview.innerHTML =
+        svgCode ||
+        `<p class="text-error">Erreur lors de la génération du SVG.</p>`;
+
+      chatHistory.innerHTML += `
+        <div class="chat chat-end">
+          <div class="chat-bubble bg-[#30475E] text-white overflow-x-auto max-w-full whitespace-pre-wrap break-words text-sm font-mono">
+            <pre>${svgCode.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+          </div>
+          <div class="chat-footer opacity-60 text-xs mt-1">assistant</div>
+        </div>
+      `;
+
+      const response = await update({
+        id,
+        svg: svgCode,
+        chat_history: JSON.stringify(history),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        console.log("✅ SVG mis à jour");
+      } else {
+        console.error("❌ Échec de la mise à jour du SVG");
+      }
+
+      form.reset();
+    });
+
+    // Téléchargement du SVG
+    const downloadBtn = document.getElementById("download-svg-btn");
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", () => {
+        const svgElement = document.querySelector("#svg-output svg");
+        if (!svgElement) {
+          alert("Aucun SVG à télécharger.");
+          return;
+        }
+
+        const svgCode = svgElement.outerHTML;
+        const blob = new Blob([svgCode], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `svg-${Date.now()}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+  </script>
+</Layout>

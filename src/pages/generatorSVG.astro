@@ -1,0 +1,170 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Bouton from "../components/bouton.astro";
+import Boutonbleu from "../components/boutonbleu.astro";
+---
+
+<Layout>
+  <div class="flex flex-col items-center justify-start min-h-screen bg-white font-jockey text-[#30475E] px-6 py-12">
+    
+    <!-- 🧱 Bloc Génération du SVG -->
+    <div class="w-full max-w-4xl p-[2px] rounded-lg bg-gradient-to-r from-[#F05454] to-[#30475E] mb-8">
+      <div class="bg-white rounded-md p-4">
+        <h2 class="text-[15px] font-semibold mb-2">Génération du SVG</h2>
+        <div id="svg-container" class="w-full h-[300px] bg-[#F5F5F5] rounded-md flex items-center justify-center">
+          <div id="svg-output" class="text-gray-400"><!-- SVG généré ici --></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🖊️ Bloc Prompt utilisateur -->
+    <div class="w-full max-w-4xl p-[2px] rounded-lg bg-gradient-to-r from-[#F05454] to-[#30475E] mb-8">
+      <div class="bg-white rounded-md p-4">
+        <h3 class="text-[15px] font-semibold mb-2">Écrivez ce que vous voulez</h3>
+        <div class="flex gap-2">
+          <button
+            id="generate-button"
+            class="bg-[#F05454] text-[#F5F5F5] font-jockey text-lg px-6 py-2 rounded-full hover:brightness-110 transition-all duration-300"
+          >
+            Générer
+          </button>
+          <input
+            id="user-prompt"
+            type="text"
+            placeholder="Décrivez votre idée ici..."
+            class="flex-1 border border-gray-200 rounded-md px-2 py-2 focus:outline-none focus:ring-2 focus:ring-[#F05454]"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- 💾 Boutons Enregistrer / Voir mes créations -->
+    <div class="flex flex-col items-center gap-4">
+      <button
+        id="save-svg-button"
+        class="bg-[#F05454] text-[#F5F5F5] font-jockey text-lg px-6 py-2 rounded-full hover:brightness-110 transition-all duration-300"
+      >
+        Enregistrer
+      </button>
+
+      
+        <!-- Use an accessible anchor styled as a button so navigation works without JS -->
+        <a
+          id="view-library"
+          href="/bibliotheque"
+          class="inline-block bg-[#30475E] text-[#F5F5F5] font-jockey text-lg px-6 py-2 rounded-full hover:brightness-110 transition-all duration-300"
+        >
+          Voir mes créations
+        </a>
+    </div>
+  </div>
+
+  <!-- 💻 Script -->
+  <script>
+    //@ts-nocheck
+
+    // === 🔹 Génération du SVG via API ===
+    async function generateSVG(prompt) {
+      const res = await fetch("/api/generateSVG", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(prompt),
+      });
+      const data = await res.json();
+      return data.svg;
+    }
+
+    let promptList = [];
+
+    async function handleSubmit() {
+      const promptElement = document.getElementById("user-prompt");
+      const svgContainer = document.getElementById("svg-container");
+      const svgOutput = document.getElementById("svg-output");
+      const generateButton = document.getElementById("generate-button");
+
+      const prompt = promptElement?.value.trim();
+      if (!prompt) {
+        alert("Veuillez entrer un prompt SVG.");
+        return;
+      }
+
+      // Reset conversation
+      promptList.length = 0;
+      promptList.push({ role: "user", content: prompt });
+
+      svgContainer.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
+      generateButton.disabled = true;
+
+      try {
+        const aiResponse = await generateSVG(promptList);
+        const svgMatch = aiResponse.content.match(/<svg[\s\S]*?<\/svg>/i);
+        aiResponse.content = svgMatch ? svgMatch[0] : "";
+
+        promptList.push(aiResponse);
+        svgOutput.textContent = aiResponse.content;
+        svgContainer.innerHTML = aiResponse.content;
+      } catch (err) {
+        console.error("Erreur SVG :", err);
+        svgContainer.innerHTML = `<p class='text-[#F05454]'>Erreur de génération du SVG</p>`;
+      } finally {
+        generateButton.disabled = false;
+      }
+    }
+
+    // === 🧠 Bouton Générer ===
+    const generateButton = document.getElementById("generate-button");
+    if (generateButton) {
+      generateButton.addEventListener("click", handleSubmit);
+    }
+
+    // === 💾 Bouton Sauvegarder ===
+    const saveButton = document.getElementById("save-svg-button");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+
+    async function saveSVG(params) {
+      console.log("Saving SVG with params: ", params);
+      const res = await fetch("/api/saveSVG", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(params),
+      });
+      const data = await res.json();
+      return { ok: res.ok, status: res.status, ...data };
+    }
+
+    if (saveButton) {
+      saveButton.addEventListener("click", async () => {
+        const name = prompt("Entrez un nom pour le SVG :");
+        const svgOutput = document.getElementById("svg-output")?.innerHTML;
+
+        if (!svgOutput) {
+          alert("Veuillez générer un SVG avant d’enregistrer.");
+          return;
+        }
+
+        console.log("Sauvegarde du SVG : ", JSON.stringify(svgOutput));
+        
+        const params = {
+          name: name,
+          // send the raw SVG code (string) so the server stores the SVG markup
+          code_svg: svgOutput || "<svg></svg>",
+          chat_history: JSON.stringify(promptList),
+          user: user ? user.id : null,
+        };
+
+        const result = await saveSVG(params);
+        if (result && result.ok) {
+          // redirect to bibliothèque after a successful save
+          window.location.href = '/bibliotheque';
+        } else {
+          console.error('Save failed', result);
+          alert('Erreur lors de la sauvegarde du SVG.');
+        }
+      });
+    }
+
+    // === 📂 Bouton Bibliothèque ===
+    // The "Voir mes créations" link is an anchor (<a href="/bibliotheque">) so it navigates
+    // without JavaScript. No extra listener is necessary.
+  </script>
+</Layout>
