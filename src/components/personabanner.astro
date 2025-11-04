@@ -1,0 +1,35 @@
+---
+import Bouton from "./bouton.astro";
+const buttonLink = "/commencer"; // lien du bouton
+const buttonText = "Commencer maintenant";
+---
+
+<section 
+  class="relative w-full h-[600px] md:h-[700px] lg:h-[800px] bg-center bg-cover"
+  style="background-image: url('/eye-glasses-5028098_1920.jpg');"
+>
+  <!-- Overlay noir semi-transparent (50%) -->
+  <!-- Utilise la syntaxe moderne bg-black/50; on force aussi le z-index pour s'assurer que le contenu soit au-dessus -->
+  <div class="absolute inset-0 bg-black/50 pointer-events-none"></div>
+
+  <!-- Contenu (texte et bouton) par-dessus l'overlay -->
+  <div class="relative z-10 flex flex-col justify-center items-start h-full px-6 md:px-16 lg:px-32">
+    
+    <!-- Titre -->
+    <h1 class="text-[#F5F5F5] font-jockey text-4xl md:text-6xl lg:text-7xl mb-4">
+      Personnaliser votre paire
+    </h1>
+    
+    <!-- Petit texte -->
+    <p class="text-[#F5F5F5] font-livvic text-base md:text-lg mb-6">
+      Plus de 2 000 utilisateurs ont déjà créé leur paire TaVue.<br>
+      Stock limité sur certains matériaux.
+    </p>
+    
+    <!-- Bouton -->
+    <a href={buttonLink}>
+      <Bouton>{buttonText}</Bouton>
+    </a>
+    
+  </div>
+</section>

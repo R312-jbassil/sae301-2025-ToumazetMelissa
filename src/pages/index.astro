@@ -6,6 +6,9 @@ import Layout from '../layouts/Layout.astro';
 import "../style/global.css";
 
 import ProductCard from "../components/ProductCard.astro";
+import Personabanner from '../components/personabanner.astro';
+import Apropos from '../components/Apropos.astro';
+import Banner from '../components/banner.astro';
 
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
@@ -13,11 +16,10 @@ import ProductCard from "../components/ProductCard.astro";
 ---
 
 <Layout>
+  <Personabanner />
 	<a href="/">
         <Bouton>Nous contacter</Bouton>
       </a>
-
-
 
 <section class="p-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
   <ProductCard
@@ -57,5 +59,7 @@ import ProductCard from "../components/ProductCard.astro";
     link="/produit6"
   />
 </section>
-
+<br><br><br><br><br><br>
+<Apropos />
+<Banner />
 </Layout>

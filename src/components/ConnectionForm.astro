@@ -1,0 +1,61 @@
+---
+import pb from '../utils/pb';
+---
+
+<div class="w-full max-w-md mx-auto border-2 border-[#30455E] rounded-xl p-6 shadow-sm">
+  <h2 class="font-jockey text-2xl text-[#121212] text-center mb-6">Connection</h2>
+
+  <form id="loginForm" class="space-y-4">
+    <input
+      type="email"
+      name="email"
+      placeholder="Email"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+    <input
+      type="password"
+      name="password"
+      placeholder="Mot de passe"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+
+    <div class="flex justify-between pt-4">
+      <a href="/inscription" class="font-jockey text-[#30455E] hover:opacity-70 transition self-center">S’inscrire</a>
+      <button
+        type="submit"
+        class="font-jockey bg-[#F05454] text-white px-6 py-2 rounded-2xl hover:opacity-90 transition"
+      >
+        Se connecter
+      </button>
+    </div>
+  </form>
+
+  <p id="loginMessage" class="text-center text-sm mt-4 text-[#30455E]"></p>
+
+  <script>
+    import pb from '../utils/pb.ts';
+
+    const form = document.getElementById('loginForm');
+    const message = document.getElementById('loginMessage');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = 'Connexion en cours...';
+
+      const email = form.email.value;
+      const password = form.password.value;
+
+      try {
+        const authData = await pb.collection('users').authWithPassword(email, password);
+        message.textContent = '✅ Connecté avec succès !';
+        console.log('User:', authData);
+        window.location.href = '/';
+      } catch (err) {
+        console.error(err);
+        message.textContent = '❌ Email ou mot de passe incorrect.';
+      }
+    });
+  </script>
+</div>

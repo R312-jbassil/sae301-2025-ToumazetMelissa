@@ -1,0 +1,31 @@
+---
+const svgLink = "/lunettes"; // lien pour le SVG
+---
+
+<section class="bg-[#F5F5F5] px-6 md:px-16 lg:px-32 py-16 flex flex-col lg:flex-row items-center">
+  <!-- Texte à gauche -->
+  <div class="lg:w-1/2 mb-8 lg:mb-0">
+    <h2 class="text-[#30475E] font-jockey text-3xl md:text-4xl mb-6">
+      A propos de nous
+    </h2>
+    
+    <p class="text-black font-livvic text-base md:text-lg mb-4">
+      Bienvenue chez TaVue, votre boutique de lunettes unisexes alliant élégance et modernité.
+    </p>
+    
+    <p class="text-black font-livvic text-base md:text-lg mb-4">
+      Chaque modèle est <span class="text-[#F05454]">fabriqué en France</span>, avec un savoir-faire artisanal reconnu. Notre style se veut raffiné, minimaliste et épuré, pour sublimer toutes les personnalités. Les montures TaVue sont pensées pour <span class="text-[#F05454]">offrir confort et légèreté, sans compromis sur l'esthétique</span>.
+    </p>
+    
+    <p class="text-black font-livvic text-base md:text-lg">
+      Découvrez des lunettes qui s'adaptent à tous les regards et toutes les occasions. Avec TaVue, adoptez un style intemporel qui affirme votre singularité.
+    </p>
+  </div>
+  
+  <!-- SVG à droite -->
+  <div class="lg:w-1/2 flex justify-center lg:justify-end">
+    <a href={svgLink}>
+      <img src="/glasses-svgrepo-com.svg" alt="Lunettes" class="max-w-xs md:max-w-sm lg:max-w-md"/>
+    </a>
+  </div>
+</section>

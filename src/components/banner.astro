@@ -1,0 +1,37 @@
+---
+const svgHref = "/stars-svgrepo-com.svg"; // Remplace par le vrai chemin de ton SVG dans /public ou /src/assets
+const ctaLink = "/commencer";
+const ctaText = "Commencer";
+---
+
+
+<section class="w-full bg-gradient-to-r from-[#F05454] to-[#30475E]" style="height:190px;">
+  <div class="max-w-7xl mx-auto h-full px-6">
+    <div class="h-full flex items-center justify-between px-6">
+
+      <!-- Left: SVG -->
+      <div class="flex items-center flex-shrink-0">
+        <a href={svgHref} aria-label="Illustration">
+          <img src={svgHref} alt="Illustration" class="w-20 h-20 md:w-35 md:h-35" />
+        </a>
+      </div>
+
+      <!-- Middle: Texte -->
+      <div class="flex-1 px-6">
+        <h2 class="text-[#F5F5F5] font-jockey text-lg md:text-2xl lg:text-3xl">
+          Faites votre paire de lunettes avec l’IA
+        </h2>
+      </div>
+
+      <!-- Right: CTA -->
+      <div class="flex-shrink-0">
+        <a href={ctaLink} class="inline-block">
+          <button class="bg-[#F5F5F5] text-[#30475E] font-jockey text-lg px-6 py-2 rounded-full hover:brightness-110 transition-all duration-300">
+            {ctaText}
+          </button>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>

@@ -1,0 +1,87 @@
+---
+import pb from '../utils/pb';
+---
+
+<div class="w-full max-w-md mx-auto border-2 border-[#30455E] rounded-xl p-6 shadow-sm">
+  <h2 class="font-jockey text-2xl text-[#121212] text-center mb-6">Inscription</h2>
+
+  <form id="signupForm" class="space-y-4">
+    <input
+      type="text"
+      name="nom"
+      placeholder="Nom"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+    <input
+      type="email"
+      name="email"
+      placeholder="Email"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+    <input
+      type="password"
+      name="password"
+      placeholder="Mot de passe"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+    <input
+      type="password"
+      name="confirm"
+      placeholder="Confirmation du mot de passe"
+      class="w-full border border-[#30455E] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#30455E]"
+      required
+    />
+
+    <div class="flex justify-between pt-4">
+      <a href="/connexion" class="font-jockey text-[#30455E] hover:opacity-70 transition self-center">Connexion</a>
+      <button
+        type="submit"
+        class="font-jockey bg-[#F05454] text-white px-6 py-2 rounded-2xl hover:opacity-90 transition"
+      >
+        S’inscrire
+      </button>
+    </div>
+  </form>
+
+  <p id="signupMessage" class="text-center text-sm mt-4 text-[#30455E]"></p>
+
+  <script>
+    import pb from '../utils/pb.ts';
+
+    const form = document.getElementById('signupForm');
+    const message = document.getElementById('signupMessage');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = 'Création du compte...';
+
+      const nom = form.nom.value;
+      const email = form.email.value;
+      const password = form.password.value;
+      const confirm = form.confirm.value;
+
+      if (password !== confirm) {
+        message.textContent = '❌ Les mots de passe ne correspondent pas.';
+        return;
+      }
+
+      try {
+        await pb.collection('users').create({
+          nom,
+          email,
+          password,
+          passwordConfirm: confirm,
+          tokenKey: crypto.randomUUID(),
+        });
+        message.textContent = '✅ Compte créé avec succès !';
+        window.location.href = '/connexion';
+      } catch (err) {
+        console.error(err);
+        message.textContent = '❌ Erreur lors de l’inscription.';
+      }
+    });
+  </script>
+</div>
