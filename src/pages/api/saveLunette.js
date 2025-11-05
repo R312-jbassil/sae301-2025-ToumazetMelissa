@@ -1,44 +1,29 @@
-import pb from "../../utils/pb";
+import pb from '../../utils/pb.js';
 
 export async function post({ request }) {
-  try {
-    const data = await request.json();
-    
-    // Créer ou mettre à jour l'entrée dans la collection LUNETTE
-    const lunetteData = {
-      materiau_monture: data.materiau_monture,
-      materiau_verre: data.materiau_verre,
-      taille_verre: data.taille_verre,
-      taille_pont: data.taille_pont,
-      user: data.userId,
-      nom_couleur: data.couleurBranches, // On utilise la couleur des branches comme nom
-      image: data.svgCode // Le code SVG complet
-    };
+  const body = await request.json();
 
-    const lunette = await pb.collection('LUNETTE').create(lunetteData);
+  // On prépare les données à enregistrer dans LUNETTE
+  const data = {
+    user: body.userId,
+    materiau_monture: body.materiau_monture,
+    materiau_verre: body.materiau_verre,
+    taille_verre: body.taille_verre,
+    taille_pont: body.taille_pont,
+    couleur_branche: body.couleurBranches,
+    couleur_monture: body.couleurMonture,
+    image: body.svgCode, // On stocke le SVG dans le champ image
+  };
+ // ⚠️ Vérifie que le nom correspond bien à ta collection PocketBase
+    const created = await pb.collection('LUNETTE').create(recordData);
 
-    // Créer une entrée dans la collection Svgs pour l'affichage dans la bibliothèque
-    const svgData = {
-      name: `Lunettes personnalisées - ${data.couleurBranches}`,
-      code_svg: data.svgCode,
-      user: data.userId
-    };
-
-    const svg = await pb.collection('Svgs').create(svgData);
-
-    return new Response(JSON.stringify({ success: true, lunetteId: lunette.id, svgId: svg.id }), {
+    return new Response(JSON.stringify({ ok: true, record: created }), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
-    console.error('Erreur lors de la sauvegarde:', error);
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+  } catch (err) {
+    console.error('saveLunette error', err);
+    return new Response(JSON.stringify({ ok: false, error: String(err) }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      }
     });
   }
-}

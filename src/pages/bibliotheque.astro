@@ -4,47 +4,107 @@ import pb from "../utils/pb";
 
 // Récupération des SVG depuis PocketBase
 const svgList = await pb.collection('Svgs').getFullList({ sort: "-created" });
+
+// Récupération des lunettes personnalisées
+const user = await pb.authStore.model;
+const lunettesList = await pb.collection('LUNETTE').getFullList({
+  sort: '-created',
+  filter: user ? `user = "${user.id}"` : '',
+  expand: 'materiau_monture,materiau_verre,taille_verre,taille_pont'
+});
 ---
 
 <Layout>
   <div class="min-h-screen bg-white font-jockey text-[#30475E] px-[100px] py-12">
     <h1 class="text-3xl font-bold text-left mb-10">Ma bibliothèque de créations</h1>
 
-    {svgList.length === 0 ? (
+    {svgList.length === 0 && lunettesList.length === 0 ? (
       <p class="text-center text-gray-500">Aucune création enregistrée pour le moment.</p>
     ) : (
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {svgList.map((svg) => (
-          <div class="flex flex-col items-center p-[2px]">
-            <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
-              <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
-                <div set:html={svg.code_svg}></div>
-              </div>
+      <div class="flex flex-col gap-12">
+        <!-- Section des lunettes personnalisées -->
+        {lunettesList.length > 0 && (
+          <div>
+            <h2 class="text-2xl font-bold mb-6">Mes lunettes personnalisées</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {lunettesList.map((lunette) => (
+                <div class="flex flex-col items-center p-[2px]">
+                  <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
+                    <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
+                      <div set:html={lunette.image}></div>
+                    </div>
 
-              <p class="mt-3 font-semibold text-center">{svg.name}</p>
+                    <div class="mt-3 text-center">
+                      <p class="font-semibold">Lunettes personnalisées</p>
+                      <div class="mt-2 text-sm">
+                        <p>Matériau monture : {lunette.expand?.materiau_monture?.libelle || lunette.materiau_monture}</p>
+                        <p>Matériau verres : {lunette.expand?.materiau_verre?.libelle || lunette.materiau_verre}</p>
+                        <p>Taille verres : {lunette.expand?.taille_verre?.mesure || lunette.taille_verre}</p>
+                        <p>Taille pont : {lunette.expand?.taille_pont?.mesure || lunette.taille_pont}</p>
+                        <p>Couleur : {lunette.expand?.couleur_branche?.libelle || lunette.couleur_branche}</p>
+                         <p>Couleur : {lunette.expand?.couleur_monture?.libelle || lunette.couleur_monture}</p>
+                      </div>
+                    </div>
 
-              <div class="flex justify-center gap-3 mt-4 w-full">
-                <a href="/paiement">
-                  <button class="bg-[#F05454] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
-                    Commander
-                  </button>
-                </a>
+                    <div class="flex justify-center gap-3 mt-4 w-full">
+                      <a href="/paiement">
+                        <button class="bg-[#F05454] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                          Commander
+                        </button>
+                      </a>
 
-                <a href="/panier">
-                  <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
-                    Panier
-                  </button>
-                </a>
-
-                <a href={`/generatorSVG?id=${svg.id}`}>
-                  <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
-                    Modifier
-                  </button>
-                </a>
-              </div>
+                      <a href="/panier">
+                        <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                          Panier
+                        </button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
+        )}
+
+        <!-- Section des SVG -->
+        {svgList.length > 0 && (
+          <div>
+            <h2 class="text-2xl font-bold mb-6">Mes autres créations</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+              {svgList.map((svg) => (
+                <div class="flex flex-col items-center p-[2px]">
+                  <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
+                    <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
+                      <div set:html={svg.code_svg}></div>
+                    </div>
+
+                    <p class="mt-3 font-semibold text-center">{svg.name}</p>
+
+                    <div class="flex justify-center gap-3 mt-4 w-full">
+                      <a href="/paiement">
+                        <button class="bg-[#F05454] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                          Commander
+                        </button>
+                      </a>
+
+                      <a href="/panier">
+                        <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                          Panier
+                        </button>
+                      </a>
+
+                      <a href={`/generatorSVG?id=${svg.id}`}>
+                        <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                          Modifier
+                        </button>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     )}
   </div>

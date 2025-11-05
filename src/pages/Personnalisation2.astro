@@ -54,10 +54,10 @@ let lunetteId = null;
       </div>
 
       <div class="flex gap-4 mt-6 justify-end">
-        <a href="/bibliotheque" class="bg-[#F05454] text-white px-6 py-2 rounded-full flex items-center justify-center">
-          Enregistrer
-        </a>
-      </div>
+  <button id="saveBtn" class="bg-[#F05454] text-white px-6 py-2 rounded-full flex items-center justify-center">
+    Enregistrer
+  </button>
+</div>
     </div>
   </div>
 </Layout>
@@ -98,7 +98,7 @@ let lunetteId = null;
     return svg.outerHTML;
   }
 
-  document.querySelector('a[href="/bibliotheque"]').addEventListener('click', async (e) => {
+  document.querySelector('saveBtn').addEventListener('click', async (e) => {
     e.preventDefault();
 
     try {
@@ -110,8 +110,8 @@ let lunetteId = null;
         materiau_verre: lunette.materiau_verre,
         taille_verre: lunette.taille_verre,
         taille_pont: lunette.taille_pont,
-        couleurBranches,
-        couleurMonture,
+        couleurBranches: lunette.couleurBranches,
+        couleurMonture: lunette.couleurMonture,
         svgCode: getSVGCode()
       };
 
@@ -133,4 +133,5 @@ let lunetteId = null;
       alert('Une erreur est survenue. Veuillez réessayer.');
     }
   });
+  
 </script>
