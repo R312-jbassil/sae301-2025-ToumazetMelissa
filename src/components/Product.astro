@@ -1,7 +1,7 @@
 ---
 // src/components/Product.astro
-import Bouton from "./bouton.astro";
-import Boutonbleu from "./boutonbleu.astro";
+import Bouton from "../components/bouton.astro";
+import Boutonbleu from "../components/boutonbleu.astro";
 
 const { product } = Astro.props; // On reçoit les données du produit
 ---
@@ -27,8 +27,8 @@ const { product } = Astro.props; // On reçoit les données du produit
     <p class="font-jockey text-xl text-[#121212] mt-4">Prix : {product.prix} €</p>
 
     <div class="flex gap-4 mt-4">
-      <Bouton label="Commander" />
-      <Boutonbleu label="Panier" />
+      <Bouton>Commander</Bouton>
+      <Boutonbleu>Panier</Boutonbleu>
     </div>
   </div>
 </div>

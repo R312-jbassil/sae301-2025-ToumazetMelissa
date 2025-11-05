@@ -1,19 +1,62 @@
 ---
-// src/pages/Produits.astro
-const products = [
-  { id: 1, title: "Lunettes élégantes", image: "/images/article1.jpg" },
-  { id: 2, title: "Lunettes modernes", image: "/images/article2.jpg" },
-  // ...
-];
+import Layout from "../layouts/Layout.astro";
+import Product from "../components/Product.astro";
+import pb from "../utils/pb";
+
+// Get the product ID from the URL parameters
+const productId = Astro.url.searchParams.get('id');
+console.log("Fetching product ID:", productId);
+
+let product = null;
+let error = null;
+
+if (productId) {
+  try {
+    const rawProduct = await pb.collection('product').getOne(productId);
+    console.log("Raw product data:", rawProduct);
+
+    // Transform the raw data to match the Product component's expected format
+    product = {
+      id: rawProduct.id,
+      title: rawProduct.title || rawProduct.name || 'Sans titre',
+      prix: rawProduct.prix || rawProduct.price || '0',
+      image: rawProduct.image ? pb.getFileUrl(rawProduct, rawProduct.image) : '/placeholder.jpg',
+      materiauxMonture: rawProduct.materiauxMonture || 'Non spécifié',
+      materiauxVerre: rawProduct.materiauxVerre || 'Non spécifié',
+      taillePont: rawProduct.taillePont || 'Non spécifié',
+      tailleVerres: rawProduct.tailleVerres || 'Non spécifié'
+    };
+    
+    console.log("Transformed product data:", product);
+  } catch (err: any) {
+    console.error("Error fetching product:", err);
+    error = err?.message || "Erreur lors de la récupération du produit";
+  }
+}
+
 ---
-<main class="container mx-auto px-6 py-10">
-  <h1 class="text-4xl font-jockey text-[#30475E] mb-8">Nos Articles</h1>
-  <div class="grid md:grid-cols-3 gap-8">
-    {products.map((p) => (
-      <a href={`/Productarticle/${p.id}`} class="block hover:opacity-90 transition">
-        <img src={p.image} alt={p.title} class="rounded-lg mb-2 object-cover" />
-        <h2 class="font-livvic text-[#121212]">{p.title}</h2>
+
+<Layout>
+  <div class="min-h-screen bg-white px-6 py-12">
+    <div class="max-w-7xl mx-auto">
+      <a href="/" class="inline-block mb-8 text-[#30475E] hover:text-[#F05454] transition-colors">
+        <span class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Retour aux produits
+        </span>
       </a>
-    ))}
+
+      {error ? (
+        <div class="text-center text-red-500 mt-12">
+          <p>Une erreur s'est produite : {error}</p>
+        </div>
+      ) : product ? (
+        <Product product={product} />
+      ) : (
+        <p class="text-center text-gray-500 mt-12">Produit non trouvé. Vérifiez l'ID du produit.</p>
+      )}
+    </div>
   </div>
-</main>
+</Layout>

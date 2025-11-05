@@ -1,5 +1,4 @@
 ---
-
 import Bouton from '../components/bouton.astro';
 import Layout from '../layouts/Layout.astro';
 
@@ -9,75 +8,61 @@ import ProductCard from "../components/ProductCard.astro";
 import Personabanner from '../components/personabanner.astro';
 import Apropos from '../components/Apropos.astro';
 import Banner from '../components/banner.astro';
+import pb from "../utils/pb";
 
+// Fetch products from PocketBase (server-side)
+const productsRaw = await pb.collection('product').getFullList({ sort: '-created' });
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Normalize product fields for the UI and build image URLs when needed
+const products = productsRaw.map((r) => {
+  // try several common field names
+  const title = r.title || r.name || 'Produit sans titre';
+  const price = r.prix ?? r.price ?? '';
+
+  // handle image field: could be a filename, array, or full URL
+  let imageUrl = '/placeholder.jpg';
+  const imgField = r.image || r.images || r.photos || null;
+
+  if (imgField) {
+    if (typeof imgField === 'string') {
+      imageUrl = imgField.startsWith('http') ? imgField : pb.getFileUrl(r, imgField);
+    } else if (Array.isArray(imgField) && imgField.length) {
+      imageUrl = typeof imgField[0] === 'string' && imgField[0].startsWith('http')
+        ? imgField[0]
+        : pb.getFileUrl(r, imgField[0]);
+    }
+  }
+
+  // Ensure we have all required fields
+  return {
+    id: r.id,
+    title,
+    price: typeof price === 'number' ? `${price} €` : price,
+    image: imageUrl,
+    link: `/Produits?id=${r.id}`,
+  };
+});
 ---
 
 <Layout>
   <Personabanner />
 <br><br><br><br>
-<h2 class="font-jockey text-3xl ml-[100px]">
-  Tendances
-</h2>
-<br><br><br><br>
-<section class="p-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-  <ProductCard
-    image="/public/article1.jpg"
-    title="Produit 1"
-    price="19,99€"
-    link="/Produits.astro"
-  />
-  <ProductCard
-    image="/public/article2.jpg"
-    title="Produit 2"
-    price="24,99€"
-    link="/Produits.astro"
-  />
-  <ProductCard
-    image="/public/article3.jpg"
-    title="Produit 3"
-    price="29,99€"
-    link="/produit3"
-  />
-  <ProductCard
-    image="/public/article4.jpg"
-    title="Produit 4"
-    price="15,99€"
-    link="/produit4"
-  />
-  <ProductCard
-    image="/public/article5.jpg"
-    title="Produit 5"
-    price="32,99€"
-    link="/produit5"
-  />
-  <ProductCard
-    image="/public/article6.jpg"
-    title="Produit 6"
-    price="22,99€"
-    link="/produit6"
-  />
-    <ProductCard
-    image="/public/article7.jpg"
-    title="Produit 7"
-    price="15,99€"
-    link="/produit7"
-  />
-  <ProductCard
-    image="/public/article8.jpg"
-    title="Produit 8"
-    price="32,99€"
-    link="/produit8"
-  />
-  <ProductCard
-    image="/public/article9.jpg"
-    title="Produit 9"
-    price="22,99€"
-    link="/produit9"
-  />
+
+<!-- Produits venant de PocketBase -->
+<section class="mx-[100px] mb-12">
+  <h2 class="font-jockey text-3xl mb-6">Tendances</h2>
+
+  {products.length === 0 ? (
+    <p class="text-gray-500">Aucun produit disponible pour le moment.</p>
+  ) : (
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {products.map((p) => (
+        <ProductCard image={p.image} title={p.title} price={p.price} link={p.link} />
+      ))}
+    </div>
+  )}
 </section>
+
 <br><br><br><br><br><br>
 <Apropos />
 <Banner />
