@@ -28,7 +28,30 @@ const { product } = Astro.props; // On reçoit les données du produit
 
     <div class="flex gap-4 mt-4">
       <Bouton>Commander</Bouton>
-      <Boutonbleu>Panier</Boutonbleu>
+      <button 
+        onclick=`addToCart('${product.id}')`
+        class="bg-[#30475E] text-[#F5F5F5] font-jockey text-lg px-6 py-2 rounded-full hover:brightness-110 transition-all duration-300">
+        Panier
+      </button>
     </div>
+
+    <script define:vars={{ productId: product.id }}>
+      function addToCart(id) {
+        // Récupérer le panier actuel ou créer un nouveau
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Ajouter le produit s'il n'est pas déjà dans le panier
+        if (!cart.includes(id)) {
+          cart.push(id);
+          localStorage.setItem('cart', JSON.stringify(cart));
+          
+          // Rediriger vers le panier
+          window.location.href = '/Panier';
+        } else {
+          // Si le produit est déjà dans le panier, juste rediriger
+          window.location.href = '/Panier';
+        }
+      }
+    </script>
   </div>
 </div>

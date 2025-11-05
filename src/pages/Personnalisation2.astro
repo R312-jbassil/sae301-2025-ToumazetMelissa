@@ -1,0 +1,136 @@
+---
+import Layout from "../layouts/Layout.astro";
+import pb from "../utils/pb";
+
+let couleurBranches = "";
+let couleurMonture = "";
+let user = await pb.authStore.model;
+let svgCode = ""; // le SVG modifié
+let lunetteId = null;
+---
+<Layout>
+  <div class="min-h-screen flex justify-center items-start bg-white font-jockey text-[#30475E] px-[100px] py-12 gap-6">
+
+    <!-- SVG avec branches derrière et taille réduite -->
+    <svg id="lunette" width="800" height="360" viewBox="0 0 1109 235" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Branches derrière -->
+      <g id="branches">
+        <path d="M11.1727 117.99C11.1727 117.99 146.638 102.701 161.955 93.9441C177.272 85.1876 192.534 72.094 215.482 67.7295C238.43 63.365 392.479 37.1503 392.479 37.1503C392.479 37.1503 412.133 31.6878 440.544 52.4399C468.954 73.192 531.238 139.84 548.696 137.672C566.182 135.476 574.911 111.457 569.448 100.532C563.986 89.607 457.81 10.6337 439.446 5.47317C413.286 -1.8834 379.358 -1.08735 337.826 5.47317C296.322 12.0337 18.8038 69.5412 18.8038 69.5412C18.8038 69.5412 -17.2379 86.3405 11.1453 118.018L11.1727 117.99Z" fill="white" stroke="#1D1D1B" stroke-width="0.5" stroke-miterlimit="10"/>
+        <g style="mix-blend-mode:multiply">
+          <path d="M558.551 105.967C558.551 105.967 557.7 122.849 547.626 121.256C533.983 119.115 449.3 28.3935 420.889 32.758C420.889 32.758 444.304 40.1969 471.562 64.7097C489.432 80.7953 566.044 168.607 558.551 105.967Z" fill="#706F6F"/>
+        </g>
+        <path d="M741.23 185.271L989.761 103.525C989.761 103.525 1050.51 88.0706 1059.35 92.49C1068.19 96.9095 1107.96 176.432 1107.96 185.271C1107.96 194.109 1101.32 223.728 1092.51 226.143C1086.11 227.9 1077.88 226.445 1073.73 214.587C1069.86 203.552 1054.95 127.489 1039.5 128.202C1024.05 128.916 900.329 171.985 900.329 171.985C900.329 171.985 863.876 189.663 848.421 202.921C832.967 216.179 760.06 233.857 760.06 233.857C760.06 233.857 733.544 212.858 741.285 185.243L741.23 185.271Z" fill="white" stroke="#1D1D1B" stroke-width="0.5" stroke-miterlimit="10"/>
+        <g style="mix-blend-mode:multiply">
+          <path d="M759.209 186.506C759.209 186.506 1039.94 89.9097 1055.26 98.6936C1055.26 98.6936 1005.3 105.529 940.625 131.304C875.954 157.08 759.209 191.776 759.209 191.776V186.506Z" fill="#706F6F"/>
+        </g>
+        <g style="mix-blend-mode:multiply">
+          <path d="M1044.74 126.005C1044.74 126.005 1053.69 126.005 1058.41 135.476C1063.13 144.946 1085.23 203.304 1085.23 203.304C1085.23 203.304 1087.35 216.974 1099.42 195.948C1099.42 195.948 1091 222.19 1084.71 214.586C1078.42 206.982 1057.89 142.311 1057.89 142.311C1057.89 142.311 1050.01 123.809 1044.74 126.005Z" fill="#706F6F"/>
+        </g>
+      </g>
+
+      <!-- Monture devant -->
+      <g id="monture">
+        <path d="M774.574 119.218C773.915 109.857 748.304 104.889 739.685 101.65C731.066 98.4108 696.589 107.03 696.589 107.03C663.182 98.4107 546.85 82.2428 480.064 82.2428C413.279 82.2428 390.66 113.481 383.111 112.41C375.562 111.34 335.705 110.269 318.467 107.03C301.228 103.791 304.467 68.2433 210.726 34.3427C117.012 0.442143 23.2707 0.25 23.2707 0.25C-13.3749 13.0416 4.71459 51.0048 4.71459 51.0048L10.3418 68.4355C22.2002 74.0078 18.9611 97.3128 23.2707 131.79C27.5803 166.267 43.7483 210.434 62.0574 237.362C80.3665 264.29 149.321 294.458 183.798 295.528C218.275 296.599 248.442 290.148 271.061 253.503C293.679 216.884 317.396 152.24 317.396 152.24L345.395 156.55C345.395 156.55 353.383 157.401 360.081 165.032C366.778 172.663 372.241 187.074 380.943 212.547C401.695 273.212 449.897 320.288 449.897 320.288C449.897 320.288 465.269 340.683 541.689 355.04C605.043 366.953 658.9 348.287 658.9 348.287C707.541 328.605 718.274 224.872 718.274 224.872C718.274 224.872 723.297 188.364 739.712 179.168C759.943 167.804 762.414 166.981 774.601 164.565C784.511 162.616 775.26 128.523 774.601 119.163L774.574 119.218ZM239.823 257.867C213.965 271.867 151.489 277.247 112.702 247.107C73.9157 216.939 55.6067 164.153 50.2265 101.677C44.8463 39.2014 69.7159 32.4213 69.7159 32.4213C69.7159 32.4213 110.561 30.5821 163.347 43.4836C216.134 56.4124 274.3 93.0306 275.398 116.747C276.468 140.437 265.708 243.868 239.85 257.867H239.823ZM663.182 324.653C638.395 336.511 604.247 337.582 575.535 335.413C546.822 333.272 472.488 331.103 445.56 249.22C445.56 249.22 438.011 210.434 431.56 201.814C425.109 193.195 405.702 162.067 405.702 151.224C405.702 128.633 425.329 115.622 425.329 115.622C425.329 115.622 447.728 101.622 476.798 101.622C505.894 101.622 654.536 109.171 675.013 137.17C695.491 165.169 694.393 197.505 697.632 223.363C700.871 249.22 687.942 312.767 663.155 324.625L663.182 324.653Z" fill="white" stroke="#1D1D1B" stroke-width="0.5" stroke-miterlimit="10"/>
+      </g>
+
+    </svg>
+
+    <div class="bg-[#F5F5F5] w-full max-w-xl p-6 rounded-xl shadow-md flex flex-col gap-6">
+      <h1 class="text-3xl font-jockey text-[#30475E] mb-4">Personnalisation</h1>
+
+      <p class="font-livvic text-lg">Couleur branches</p>
+      <div class="flex gap-4">
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="branches" data-color="#D07841" style="background-color:#D07841"></div>
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="branches" data-color="#6492C0" style="background-color:#6492C0"></div>
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="branches" data-color="#FAA3A3" style="background-color:#FAA3A3"></div>
+      </div>
+
+      <p class="font-livvic text-lg mt-4">Couleur monture</p>
+      <div class="flex gap-4">
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="monture" data-color="#D07841" style="background-color:#D07841"></div>
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="monture" data-color="#6492C0" style="background-color:#6492C0"></div>
+        <div class="w-12 h-12 rounded-full cursor-pointer color-btn" data-type="monture" data-color="#FAA3A3" style="background-color:#FAA3A3"></div>
+      </div>
+
+      <div class="flex gap-4 mt-6 justify-end">
+        <a href="/bibliotheque" class="bg-[#F05454] text-white px-6 py-2 rounded-full flex items-center justify-center">
+          Enregistrer
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script type="module">
+  const svg = document.getElementById("lunette");
+  const userId = "{user?.id}";
+
+  let couleurBranches = "";
+  let couleurMonture = "";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const lunetteId = urlParams.get('id');
+
+  function setColor(type, color) {
+    if (type === "branches") {
+      svg.querySelectorAll("#branches path").forEach(path => path.setAttribute("fill", color));
+      couleurBranches = color;
+    } else if (type === "monture") {
+      svg.querySelectorAll("#monture path").forEach(path => path.setAttribute("fill", color));
+      couleurMonture = color;
+    }
+  }
+
+  document.querySelectorAll('.color-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      // Gestion de la couleur active
+      const type = button.dataset.type;
+      document.querySelectorAll(`.color-btn[data-type="${type}"]`).forEach(btn => btn.classList.remove('border-4', 'border-black'));
+      button.classList.add('border-4', 'border-black');
+
+      // Changer la couleur SVG
+      setColor(type, button.dataset.color);
+    });
+  });
+
+  function getSVGCode() {
+    return svg.outerHTML;
+  }
+
+  document.querySelector('a[href="/bibliotheque"]').addEventListener('click', async (e) => {
+    e.preventDefault();
+
+    try {
+      const lunette = await pb.collection('LUNETTE').getOne(lunetteId);
+
+      const data = {
+        userId,
+        materiau_monture: lunette.materiau_monture,
+        materiau_verre: lunette.materiau_verre,
+        taille_verre: lunette.taille_verre,
+        taille_pont: lunette.taille_pont,
+        couleurBranches,
+        couleurMonture,
+        svgCode: getSVGCode()
+      };
+
+      const response = await fetch('/api/saveLunette', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        window.location.href = '/bibliotheque';
+      } else {
+        alert('Erreur lors de la sauvegarde. Veuillez réessayer.');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      alert('Une erreur est survenue. Veuillez réessayer.');
+    }
+  });
+</script>
