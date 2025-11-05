@@ -4,15 +4,15 @@ export async function POST({ request }) {
   try {
     const body = await request.json();
 
-    // Expecting params: { name, code_svg, chat_history, user }
+    // Données préparées pour PocketBase
     const recordData = {
       name: body.name || 'Untitled SVG',
       code_svg: body.code_svg || '<svg></svg>',
-      chat_history: body.chat_history ? JSON.parse(body.chat_history) : [],
+      chat_history: body.chat_history || '[]', // ✅ reste une string JSON
       user: body.user || null,
     };
 
-    // Replace 'Svgs' with your actual PocketBase collection name if different.
+    // ⚠️ Vérifie que le nom correspond bien à ta collection PocketBase
     const created = await pb.collection('Svgs').create(recordData);
 
     return new Response(JSON.stringify({ ok: true, record: created }), {
@@ -21,6 +21,8 @@ export async function POST({ request }) {
     });
   } catch (err) {
     console.error('saveSVG error', err);
-    return new Response(JSON.stringify({ ok: false, error: String(err) }), { status: 500 });
+    return new Response(JSON.stringify({ ok: false, error: String(err) }), {
+      status: 500,
+    });
   }
 }

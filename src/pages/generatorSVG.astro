@@ -135,7 +135,8 @@ import Boutonbleu from "../components/boutonbleu.astro";
     if (saveButton) {
       saveButton.addEventListener("click", async () => {
         const name = prompt("Entrez un nom pour le SVG :");
-        const svgOutput = document.getElementById("svg-output")?.innerHTML;
+        const svgOutput = document.getElementById("svg-container")?.innerHTML;
+
 
         if (!svgOutput) {
           alert("Veuillez générer un SVG avant d’enregistrer.");
