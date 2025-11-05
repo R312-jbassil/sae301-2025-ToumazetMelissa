@@ -1,0 +1,19 @@
+---
+// src/pages/Produits.astro
+const products = [
+  { id: 1, title: "Lunettes élégantes", image: "/images/article1.jpg" },
+  { id: 2, title: "Lunettes modernes", image: "/images/article2.jpg" },
+  // ...
+];
+---
+<main class="container mx-auto px-6 py-10">
+  <h1 class="text-4xl font-jockey text-[#30475E] mb-8">Nos Articles</h1>
+  <div class="grid md:grid-cols-3 gap-8">
+    {products.map((p) => (
+      <a href={`/Productarticle/${p.id}`} class="block hover:opacity-90 transition">
+        <img src={p.image} alt={p.title} class="rounded-lg mb-2 object-cover" />
+        <h2 class="font-livvic text-[#121212]">{p.title}</h2>
+      </a>
+    ))}
+  </div>
+</main>

@@ -1,0 +1,34 @@
+---
+// src/components/Product.astro
+import Bouton from "./bouton.astro";
+import Boutonbleu from "./boutonbleu.astro";
+
+const { product } = Astro.props; // On reçoit les données du produit
+---
+<div class="flex flex-col md:flex-row items-start md:items-center gap-10 py-10">
+  <img src={product.image} alt={product.title} class="w-full md:w-1/2 rounded-lg object-cover" />
+
+  <div class="flex flex-col gap-4 w-full md:w-1/2">
+    <h2 class="text-3xl font-jockey text-[#30475E]">{product.title}</h2>
+
+    <p class="font-livvic text-[#121212]">
+      <strong>Matériaux monture :</strong> {product.materiauxMonture}
+    </p>
+    <p class="font-livvic text-[#121212]">
+      <strong>Matériaux verre :</strong> {product.materiauxVerre}
+    </p>
+    <p class="font-livvic text-[#121212]">
+      <strong>Taille du pont :</strong> {product.taillePont}
+    </p>
+    <p class="font-livvic text-[#121212]">
+      <strong>Taille des verres :</strong> {product.tailleVerres}
+    </p>
+
+    <p class="font-jockey text-xl text-[#121212] mt-4">Prix : {product.prix} €</p>
+
+    <div class="flex gap-4 mt-4">
+      <Bouton label="Commander" />
+      <Boutonbleu label="Panier" />
+    </div>
+  </div>
+</div>
