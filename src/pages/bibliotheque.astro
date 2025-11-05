@@ -2,24 +2,22 @@
 import Layout from "../layouts/Layout.astro";
 import pb from "../utils/pb";
 
-// Récupération des SVG directement depuis PocketBase (serveur local)
-// NOTE: use the actual collection name from your PocketBase admin. If your collection is named "Svgs"
-// use 'Svgs' below. Adjust if it's different.
+// Récupération des SVG depuis PocketBase
 const svgList = await pb.collection('Svgs').getFullList({ sort: "-created" });
 ---
 
 <Layout>
-  <div class="min-h-screen bg-white font-jockey text-[#30475E] px-8 py-12">
-    <h1 class="text-3xl font-bold text-center mb-10">🖼️ Ma bibliothèque de créations</h1>
+  <div class="min-h-screen bg-white font-jockey text-[#30475E] px-[100px] py-12">
+    <h1 class="text-3xl font-bold text-left mb-10">Ma bibliothèque de créations</h1>
 
     {svgList.length === 0 ? (
       <p class="text-center text-gray-500">Aucune création enregistrée pour le moment.</p>
     ) : (
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
         {svgList.map((svg) => (
-          <div class="flex flex-col items-center p-[2px] bg-gradient-to-r from-[#F05454] to-[#30475E] rounded-xl shadow-md">
+          <div class="flex flex-col items-center p-[2px]">
             <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
-              <div class="w-full h-[250px] flex items-center justify-center overflow-hidden border border-gray-200 rounded-lg bg-gray-50">
+              <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
                 <div set:html={svg.code_svg}></div>
               </div>
 
@@ -39,7 +37,7 @@ const svgList = await pb.collection('Svgs').getFullList({ sort: "-created" });
                 </a>
 
                 <a href={`/generatorSVG?id=${svg.id}`}>
-                  <button class="bg-[#F5A623] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
+                  <button class="bg-[#30475E] text-white px-4 py-2 rounded-full hover:brightness-110 transition">
                     Modifier
                   </button>
                 </a>
