@@ -2,28 +2,64 @@
 import Layout from "../layouts/Layout.astro";
 import pb from "../utils/pb";
 
-// Récupération des SVG depuis PocketBase
-const svgList = await pb.collection('Svgs').getFullList({ sort: "-created" });
+// Chargement robuste avec gestion d'erreurs côté serveur
+let svgList: any[] = [];
+let lunettesList: any[] = [];
+let libraryError: string | null = null;
+let user: any = null;
 
-// Récupération des lunettes personnalisées
-const user = await pb.authStore.model;
-const lunettesList = await pb.collection('LUNETTE').getFullList({
-  sort: '-created',
-  filter: user ? `user = "${user.id}"` : '',
-  expand: 'materiau_monture,materiau_verre,taille_verre,taille_pont'
-});
+// Charger l'auth PB depuis les cookies de la requête pour respecter les rules de la collection
+try {
+  const cookie = Astro.request?.headers?.get('cookie') || '';
+  if (cookie) pb.authStore.loadFromCookie(cookie);
+  user = pb.authStore.model;
+} catch (e) {
+  console.error('Erreur chargement auth PB depuis cookie:', e);
+}
+
+try {
+  // Récupération des SVG depuis PocketBase (filtrés par user si auth)
+  svgList = await pb.collection('Svgs').getFullList({
+    sort: "-created",
+    filter: user ? `user = "${user.id}"` : ''
+  });
+} catch (e) {
+  console.error('Erreur chargement Svgs:', e);
+  libraryError = 'Impossible de charger vos SVG. Vérifiez votre connexion ou vos droits.';
+}
+
+try {
+  // Récupération des lunettes personnalisées
+  // user déjà déterminé ci-dessus via cookie
+  lunettesList = await pb.collection('LUNETTE').getFullList({
+    sort: '-created',
+    filter: user ? `user = "${user.id}"` : '',
+    // Inclut aussi les relations de couleurs pour afficher les libellés au lieu des IDs
+    expand: 'materiau_monture,materiau_verre,taille_verre,taille_pont,couleur_branches,couleur_monture'
+  }) as any[];
+} catch (e) {
+  console.error('Erreur chargement LUNETTE:', e);
+  // On ne bloque pas la page si la partie lunettes échoue
+  if (!libraryError) libraryError = 'Une partie de la bibliothèque n\'a pas pu être chargée.';
+}
 ---
 
 <Layout>
   <div class="min-h-screen bg-white font-jockey text-[#30475E] px-[100px] py-12">
     <h1 class="text-3xl font-bold text-left mb-10">Ma bibliothèque de créations</h1>
 
-    {svgList.length === 0 && lunettesList.length === 0 ? (
+    {libraryError && (
+      <div class="mb-6 p-3 rounded-md bg-red-50 text-red-700 text-sm">
+        {libraryError}
+      </div>
+    )}
+
+    {(!svgList || svgList.length === 0) && (!lunettesList || lunettesList.length === 0) ? (
       <p class="text-center text-gray-500">Aucune création enregistrée pour le moment.</p>
     ) : (
       <div class="flex flex-col gap-12">
         <!-- Section des lunettes personnalisées -->
-        {lunettesList.length > 0 && (
+        {lunettesList && lunettesList.length > 0 && (
           <div>
             <h2 class="text-2xl font-bold mb-6">Mes lunettes personnalisées</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -31,7 +67,7 @@ const lunettesList = await pb.collection('LUNETTE').getFullList({
                 <div class="flex flex-col items-center p-[2px]">
                   <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
                     <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
-                      <div set:html={lunette.image}></div>
+                      <div set:html={lunette?.image || ''}></div>
                     </div>
 
                     <div class="mt-3 text-center">
@@ -41,8 +77,8 @@ const lunettesList = await pb.collection('LUNETTE').getFullList({
                         <p>Matériau verres : {lunette.expand?.materiau_verre?.libelle || lunette.materiau_verre}</p>
                         <p>Taille verres : {lunette.expand?.taille_verre?.mesure || lunette.taille_verre}</p>
                         <p>Taille pont : {lunette.expand?.taille_pont?.mesure || lunette.taille_pont}</p>
-                        <p>Couleur : {lunette.expand?.couleur_branche?.libelle || lunette.couleur_branche}</p>
-                         <p>Couleur : {lunette.expand?.couleur_monture?.libelle || lunette.couleur_monture}</p>
+                        <p>Couleur des branches : {lunette.expand?.couleur_branches?.libelle || lunette.couleur_branches}</p>
+                        <p>Couleur de la monture : {lunette.expand?.couleur_monture?.libelle || lunette.couleur_monture}</p>
                       </div>
                     </div>
 
@@ -67,7 +103,7 @@ const lunettesList = await pb.collection('LUNETTE').getFullList({
         )}
 
         <!-- Section des SVG -->
-        {svgList.length > 0 && (
+        {svgList && svgList.length > 0 && (
           <div>
             <h2 class="text-2xl font-bold mb-6">Mes autres créations</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
@@ -75,7 +111,7 @@ const lunettesList = await pb.collection('LUNETTE').getFullList({
                 <div class="flex flex-col items-center p-[2px]">
                   <div class="bg-white rounded-xl w-full flex flex-col items-center p-4">
                     <div class="w-full h-[250px] flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
-                      <div set:html={svg.code_svg}></div>
+                      <div set:html={svg?.code_svg || ''}></div>
                     </div>
 
                     <p class="mt-3 font-semibold text-center">{svg.name}</p>

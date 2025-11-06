@@ -1,25 +1,22 @@
-import pb from '../../utils/pb.js';
+import pb from '../../utils/pb';
 
 export const POST = async ({ request }) => {
   const body = await request.json();
   try {
-  // On prépare les données à enregistrer dans LUNETTE
-  const data = {
-    user: body.userId,
-    materiau_monture: body.materiau_monture,
-    materiau_verre: body.materiau_verre,
-    taille_verre: body.taille_verre,
-    taille_pont: body.taille_pont,
-    couleur_branche: body.couleurBranches,
-    couleur_monture: body.couleurMonture,
-    image: body.svgCode, // On stocke le SVG dans le champ image
-  };
-  console.log(data);
+    console.log('Mise à jour lunette:', body.id);
+    console.log('Avec couleurs:', body);
+    
+    // On met à jour uniquement les couleurs et l'image SVG
+    const data = {
+      couleur_branches: body.couleur_branches,
+      couleur_monture: body.couleur_monture,
+      image: body.image,
+    };
   
- // ⚠️ Vérifie que le nom correspond bien à ta collection PocketBase
-    const created = await pb.collection('LUNETTE').create(data);
+    // ⚠️ On UPDATE l'enregistrement existant créé dans Personnalisation1
+    const updated = await pb.collection('LUNETTE').update(body.id, data);
 
-    return new Response(JSON.stringify({ ok: true, record: created }), {
+    return new Response(JSON.stringify({ ok: true, record: updated }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -27,6 +24,7 @@ export const POST = async ({ request }) => {
     console.error('saveLunette error', err);
     return new Response(JSON.stringify({ ok: false, error: String(err) }), {
       status: 500,
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 }

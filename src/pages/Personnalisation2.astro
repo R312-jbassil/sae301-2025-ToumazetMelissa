@@ -3,6 +3,15 @@ import Layout from "../layouts/Layout.astro";
 import pb from "../utils/pb";
 
 let user = await pb.authStore.model;
+
+
+
+// const userId = user?.id || null;
+let svgCode = "";
+let lunetteId = null;
+const couleur_branches = await pb.collection('COULEUR_BRANCHES').getFullList();
+const couleur_monture = await pb.collection('COULEUR_MONTURE').getFullList();
+
 ---
 <Layout>
   <div class="min-h-screen flex justify-center items-start bg-white font-jockey text-[#30475E] px-[100px] py-12 gap-6">
@@ -16,35 +25,37 @@ let user = await pb.authStore.model;
       <!-- Couleur branches -->
       <p class="font-livvic text-lg">Couleur des branches</p>
       <div class="flex gap-6">
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurBranches" value="#D07841" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#D07841"></span>
-        </label>
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurBranches" value="#6492C0" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#6492C0"></span>
-        </label>
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurBranches" value="#FAA3A3" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#FAA3A3"></span>
-        </label>
+        {couleur_branches?.length ? (
+          couleur_branches.map((c) => {
+            const hex = c.hex_couleur || c.couleur_branches;
+            return (
+              <label class="flex flex-col items-center cursor-pointer">
+                <input type="radio" name="couleurBranches" value={hex} data-id={c.id} class="hidden peer">
+                <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style={`background-color:${hex}`}></span>
+              </label>
+            );
+          })
+        ) : (
+          <span class="text-sm text-red-500">Aucune couleur branches trouvée dans PocketBase.</span>
+        )}
       </div>
 
       <!-- Couleur monture -->
       <p class="font-livvic text-lg mt-4">Couleur de la monture</p>
       <div class="flex gap-6">
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurMonture" value="#D07841" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#D07841"></span>
-        </label>
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurMonture" value="#6492C0" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#6492C0"></span>
-        </label>
-        <label class="flex flex-col items-center cursor-pointer">
-          <input type="radio" name="couleurMonture" value="#FAA3A3" class="hidden peer">
-          <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style="background-color:#FAA3A3"></span>
-        </label>
+        {couleur_monture?.length ? (
+          couleur_monture.map((c) => {
+            const hex = c.hex_couleur || c.couleur_monture;
+            return (
+              <label class="flex flex-col items-center cursor-pointer">
+                <input type="radio" name="couleurMonture" value={hex} data-id={c.id} class="hidden peer">
+                <span class="w-10 h-10 rounded-full border-2 border-gray-400 peer-checked:border-black" style={`background-color:${hex}`}></span>
+              </label>
+            );
+          })
+        ) : (
+          <span class="text-sm text-red-500">Aucune couleur monture trouvée dans PocketBase.</span>
+        )}
       </div>
 
       <div class="flex gap-4 mt-6 justify-end">
@@ -56,26 +67,33 @@ let user = await pb.authStore.model;
 
 <script type="module">
   const svg = document.getElementById("lunette");
-  const userId = "{user?.id}";
+  const userData = localStorage.getItem('user');
+  const userId = userData ? JSON.parse(userData)?.record?.id : null;
   const urlParams = new URLSearchParams(window.location.search);
   const lunetteId = urlParams.get("id");
 
-  let couleurBranches = "";
-  let couleurMonture = "";
+  let couleurBranchesHex = ""; // Pour changer la couleur du SVG
+  let couleurBranchesId = ""; // Pour enregistrer dans PocketBase
+  let couleurMontureHex = "";
+  let couleurMontureId = "";
 
   // 🎨 Quand on clique sur un radio pour les branches
   document.querySelectorAll('input[name="couleurBranches"]').forEach(radio => {
     radio.addEventListener("change", e => {
-      couleurBranches = e.target.value;
-      svg.querySelectorAll("#branches path").forEach(path => path.setAttribute("fill", couleurBranches));
+      couleurBranchesHex = e.target.value; // Le code hex (ex: #D07841)
+      couleurBranchesId = e.target.getAttribute("data-id"); // L'ID du record COULEUR
+      svg.querySelectorAll("#branches path").forEach(path => path.setAttribute("fill", couleurBranchesHex));
+      console.log('Couleur branches sélectionnée:', { hex: couleurBranchesHex, id: couleurBranchesId });
     });
   });
 
   // 🎨 Quand on clique sur un radio pour la monture
   document.querySelectorAll('input[name="couleurMonture"]').forEach(radio => {
     radio.addEventListener("change", e => {
-      couleurMonture = e.target.value;
-      svg.querySelectorAll("#monture path").forEach(path => path.setAttribute("fill", couleurMonture));
+      couleurMontureHex = e.target.value;
+      couleurMontureId = e.target.getAttribute("data-id");
+      svg.querySelectorAll("#monture path").forEach(path => path.setAttribute("fill", couleurMontureHex));
+      console.log('Couleur monture sélectionnée:', { hex: couleurMontureHex, id: couleurMontureId });
     });
   });
 
@@ -85,23 +103,44 @@ let user = await pb.authStore.model;
 
   document.querySelector("#saveBtn").addEventListener("click", async e => {
     e.preventDefault();
+    
+    if (!lunetteId) {
+      alert("Erreur : Aucune lunette à sauvegarder. Recommencez depuis Personnalisation 1.");
+      return;
+    }
+    
+    if (!couleurBranchesId || !couleurMontureId) {
+      alert("Veuillez sélectionner les couleurs pour les branches et la monture.");
+      return;
+    }
+    
     try {
+      console.log('Sauvegarde lunette ID:', lunetteId);
+      console.log('IDs couleurs:', { couleurBranchesId, couleurMontureId });
+      
       const response = await fetch("/api/saveLunette", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId,
-          couleurBranches,
-          couleurMonture,
-          svgCode: getSVGCode(),
+          id: lunetteId,
+          couleur_branches: couleurBranchesId, // Avec 's' pour correspondre à l'API
+          couleur_monture: couleurMontureId,
+          image: getSVGCode(),
         }),
       });
+      
       const result = await response.json();
-      if (result.ok) window.location.href = "/bibliotheque";
-      else alert("Erreur lors de la sauvegarde.");
+      console.log('Résultat sauvegarde:', result);
+      
+      if (result.ok) {
+        window.location.href = "/bibliotheque";
+      } else {
+        console.error('Erreur détails:', result.details);
+        alert("Erreur lors de la sauvegarde: " + (result.error || "Inconnue"));
+      }
     } catch (err) {
       console.error(err);
-      alert("Erreur de connexion.");
+      alert("Erreur de connexion: " + err.message);
     }
   });
 </script>

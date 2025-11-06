@@ -49,6 +49,7 @@ import pb from '../utils/pb';
 
       try {
         const authData = await pb.collection('users').authWithPassword(email, password);
+        localStorage.setItem('user', JSON.stringify(authData));
         message.textContent = '✅ Connecté avec succès !';
         console.log('User:', authData);
         window.location.href = '/';

@@ -118,8 +118,9 @@ import Boutonbleu from "../components/boutonbleu.astro";
     }
 
     // === 💾 Bouton Sauvegarder ===
-    const saveButton = document.getElementById("save-svg-button");
-    const user = JSON.parse(localStorage.getItem("user") || "null");
+  const saveButton = document.getElementById("save-svg-button");
+  const userData = JSON.parse(localStorage.getItem("user") || "null");
+  const userId = userData?.record?.id || userData?.id || null;
 
     async function saveSVG(params) {
       console.log("Saving SVG with params: ", params);
@@ -150,7 +151,7 @@ import Boutonbleu from "../components/boutonbleu.astro";
           // send the raw SVG code (string) so the server stores the SVG markup
           code_svg: svgOutput || "<svg></svg>",
           chat_history: JSON.stringify(promptList),
-          user: user ? user.id : null,
+          user: userId,
         };
 
         const result = await saveSVG(params);

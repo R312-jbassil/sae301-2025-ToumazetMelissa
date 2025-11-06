@@ -1,15 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import pb from "../utils/pb.js";
+import pb from "../utils/pb";
 
 let materiauMonture = "";
 let materiauVerre = "";
 let tailleVerre = "";
 let taillePont = "";
-let user = await pb.authStore.model;
-const userId = user?.id || null;
+
+// const userId = user?.id || null;
 let svgCode = "";
 let lunetteId = null;
+const materiau_monture = await pb.collection('MATERIAU_MONTURE').getFullList();
+const materiau_verre = await pb.collection('MATERIAU_VERRE').getFullList();
+const taille_verre = await pb.collection('TAILLE_VERRE').getFullList();
+const taille_pont = await pb.collection('TAILLE_PONT').getFullList();
 ---
 
 <Layout>
@@ -53,45 +57,58 @@ let lunetteId = null;
       <div class="flex flex-col gap-4">
         <label>Matériaux monture :</label>
         <select id="materiauMonture" class="p-2 rounded border border-gray-300">
-          <option value="">Choisir</option>
+          <!-- <option value="">Choisir</option>
           <option value="alluminium">Alluminium</option>
           <option value="metal">Métal</option>
-          <option value="plastique">Plastique</option>
+          <option value="plastique">Plastique</option> -->
+          {materiau_monture.map((materiau) => (
+            <option value={materiau.id}>{materiau.libelle}</option>
+          ))}
+
         </select>
 
         <label>Matériaux verres :</label>
         <select id="materiauVerre" class="p-2 rounded border border-gray-300">
-          <option value="">Choisir</option>
+          <!---<option value="">Choisir</option>
           <option value="verres_bleus">Verres bleus</option>
-          <option value="verres_normaux">Verres normaux</option>
+          <option value="verres_normaux">Verres normaux</option>-->
+          {materiau_verre.map((materiau) => (
+            <option value={materiau.id}>{materiau.libelle}</option>
+          ))}
         </select>
 
         <label>Tailles de verres :</label>
         <select id="tailleVerre" class="p-2 rounded border border-gray-300">
-          <option value="">Choisir</option>
+         <!--  <option value="">Choisir</option>
           <option value="40">40</option>
           <option value="45">45</option>
           <option value="50">50</option>
-          <option value="55">55</option>
+          <option value="55">55</option>-->
+          {taille_verre.map((taille) => (
+            <option value={taille.id}>{taille.mesure}</option>
+          ))}
         </select>
 
         <label>Largeur du pont :</label>
         <select id="taillePont" class="p-2 rounded border border-gray-300">
-          <option value="">Choisir</option>
+          <!-- <option value="">Choisir</option>
           <option value="14">14</option>
           <option value="16">16</option>
           <option value="18">18</option>
           <option value="20">20</option>
-          <option value="22">22</option>
+          <option value="22">22</option>-->
+           {taille_pont.map((taille) => (
+            <option value={taille.id}>{taille.mesure}</option>
+          ))}
         </select>
       </div>
 
       <!-- Boutons -->
       <div class="flex gap-4 mt-6 justify-end">
   <!-- Suivant → Personnalisation2.astro -->
-  <a href="/Personnalisation2" class="bg-[#F05454] text-white px-6 py-2 rounded-full flex items-center justify-center">
+  <button id="nextBtn" class="bg-[#F05454] text-white px-6 py-2 rounded-full flex items-center justify-center">
     Suivant
-  </a>
+  </button>
 </div>
 
 
@@ -100,9 +117,10 @@ let lunetteId = null;
 </Layout>
 
 <script type="module">
-  import pb from '../utils/pb.js';
-
-  const userId = "{user?.id}";
+  const userData = localStorage.getItem('user');
+  console.log("User Data from localStorage:", userData);
+  const userId = JSON.parse(userData)?.record?.id;
+  console.log("User ID:", userId);
 
   function readForm() {
     return {
@@ -110,30 +128,35 @@ let lunetteId = null;
       materiau_verre: document.getElementById('materiauVerre').value,
       taille_verre: document.getElementById('tailleVerre').value,
       taille_pont: document.getElementById('taillePont').value,
-      user: userId || null,
-      image: '',
-      nom_couleur: '',
-      code_svg: '',
+      userId: userId || null,
     };
-  }
-
-  async function createLunette(payload) {
-    try {
-      const lunette = await pb.collection('LUNETTE').create(payload);
-      return lunette.id;
-    } catch (err) {
-      console.error('Erreur création lunette :', err);
-      throw err;
-    }
   }
 
   document.getElementById('nextBtn').addEventListener('click', async () => {
     try {
       const payload = readForm();
-      const id = await createLunette(payload);
-      window.location.href = `/Personnalisation2?id=${id}`;
-    } catch {
-      alert('Erreur lors de la création, réessayez');
+      console.log('Payload envoyé:', payload);
+      
+      const response = await fetch('/api/createLunette', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      console.log('Response status:', response.status);
+      const result = await response.json();
+      console.log('Result reçu:', result);
+      
+      if (result.ok && result.id) {
+        console.log('Navigation vers Personnalisation2 avec ID:', result.id);
+        window.location.href = `/Personnalisation2?id=${result.id}`;
+      } else {
+        console.error('Erreur dans result:', result);
+        alert('Erreur lors de la création: ' + (result.error || 'Inconnue'));
+      }
+    } catch (err) {
+      console.error('Erreur catch:', err);
+      alert('Erreur lors de la création: ' + err.message);
     }
   });
 </script>
