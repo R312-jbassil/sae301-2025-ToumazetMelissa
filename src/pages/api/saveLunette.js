@@ -1,8 +1,8 @@
 import pb from '../../utils/pb.js';
 
-export async function post({ request }) {
+export const POST = async ({ request }) => {
   const body = await request.json();
-
+  try {
   // On prépare les données à enregistrer dans LUNETTE
   const data = {
     user: body.userId,
@@ -14,12 +14,14 @@ export async function post({ request }) {
     couleur_monture: body.couleurMonture,
     image: body.svgCode, // On stocke le SVG dans le champ image
   };
+  console.log(data);
+  
  // ⚠️ Vérifie que le nom correspond bien à ta collection PocketBase
-    const created = await pb.collection('LUNETTE').create(recordData);
+    const created = await pb.collection('LUNETTE').create(data);
 
     return new Response(JSON.stringify({ ok: true, record: created }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (err) {
     console.error('saveLunette error', err);
@@ -27,3 +29,4 @@ export async function post({ request }) {
       status: 500,
     });
   }
+}
