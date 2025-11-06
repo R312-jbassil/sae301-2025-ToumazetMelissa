@@ -89,7 +89,7 @@ const svg = await pb.collection('Svgs').getOne(id);
     async function generateSVG(prompt) {
       const selectedModel = "meta-llama/Llama-3.1-8B-Instruct:novita";
       try {
-        const response = await fetch("/api/generateSVG", {
+        const response = await fetch("/js/generateSVG", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: [prompt], model: selectedModel }),
@@ -109,7 +109,7 @@ const svg = await pb.collection('Svgs').getOne(id);
     }
 
     async function update(updatedData) {
-      const response = await fetch("/api/updateSVG", {
+      const response = await fetch("/js/updateSVG", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),

@@ -118,7 +118,7 @@ const couleur_monture = await pb.collection('COULEUR_MONTURE').getFullList();
       console.log('Sauvegarde lunette ID:', lunetteId);
       console.log('IDs couleurs:', { couleurBranchesId, couleurMontureId });
       
-      const response = await fetch("/api/saveLunette", {
+      const response = await fetch("/js/saveLunette", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

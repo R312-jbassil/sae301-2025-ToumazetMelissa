@@ -65,7 +65,7 @@ import Boutonbleu from "../components/boutonbleu.astro";
 
     // === 🔹 Génération du SVG via API ===
     async function generateSVG(prompt) {
-      const res = await fetch("/api/generateSVG", {
+      const res = await fetch("/js/generateSVG", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(prompt),
@@ -124,7 +124,7 @@ import Boutonbleu from "../components/boutonbleu.astro";
 
     async function saveSVG(params) {
       console.log("Saving SVG with params: ", params);
-      const res = await fetch("/api/saveSVG", {
+      const res = await fetch("/js/saveSVG", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(params),
