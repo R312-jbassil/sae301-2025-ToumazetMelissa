@@ -3,6 +3,14 @@ import Layout from "../layouts/Layout.astro";
 import Product from "../components/Product.astro";
 import pb from "../utils/pb";
 
+// Charger l'authentification depuis les cookies pour respecter les règles PocketBase
+try {
+  const cookie = Astro.request?.headers?.get('cookie') || '';
+  if (cookie) pb.authStore.loadFromCookie(cookie);
+} catch (e) {
+  console.error('Erreur chargement auth PB:', e);
+}
+
 // Get the product ID from the URL parameters
 const productId = Astro.url.searchParams.get('id');
 console.log("Fetching product ID:", productId);
@@ -30,7 +38,15 @@ if (productId) {
     console.log("Transformed product data:", product);
   } catch (err: any) {
     console.error("Error fetching product:", err);
-    error = err?.message || "Erreur lors de la récupération du produit";
+    // Message plus explicite pour l'erreur de permissions
+    if (String(err).includes('Only superusers') || String(err).includes('403')) {
+      error = "Accès refusé : configurez les règles d'accès de la collection 'product' dans PocketBase Admin (List rule et View rule).";
+    } else {
+      error = err?.message || "Erreur lors de la récupération du produit";
+    }
+  } finally {
+    // Nettoyer l'authStore pour éviter les fuites de session
+    try { pb.authStore.clear(); } catch {}
   }
 }
 

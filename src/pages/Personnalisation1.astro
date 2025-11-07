@@ -137,7 +137,7 @@ const taille_pont = await pb.collection('TAILLE_PONT').getFullList();
       const payload = readForm();
       console.log('Payload envoyé:', payload);
       
-      const response = await fetch('/api/createLunette', {
+      const response = await fetch('/js/createLunette', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
